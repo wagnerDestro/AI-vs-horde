@@ -24,7 +24,7 @@ public class character1 : MonoBehaviour
     public bool collided = false;
 
     public int direction;
-    private float waitTime = 2.0f;
+    private float waitTime;
     private float timeCurrentWaiting = 0f;
 
 
@@ -35,6 +35,7 @@ public class character1 : MonoBehaviour
     {
         speed = Time.deltaTime/2f;
         directionMultiplier = 2;
+        waitTime = Random.Range(1, 4);
     }
 
     void Update()
@@ -44,6 +45,7 @@ public class character1 : MonoBehaviour
             if (timeCurrentWaiting >= waitTime){
                 arrived = false;
                 timeCurrentWaiting = 0f;
+                waitTime = Random.Range(1, 4); 
             }
         }else{
             move();            
