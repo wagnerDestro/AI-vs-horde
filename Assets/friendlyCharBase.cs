@@ -6,7 +6,6 @@ public class character1 : MonoBehaviour
 {
 
     // Update is called once per frame
-    private float time = 2f;
 
 
     public GameObject floor; 
@@ -15,69 +14,97 @@ public class character1 : MonoBehaviour
     public GameObject leftWall;
     private int directionMultiplier;
 
+    public Vector3 target;
+
+    public bool moving = false;
+    public bool arrived = false;
+
+    public bool canMove = true;
+
+    public bool collided = false;
+
+    public int direction;
+    private float waitTime = 2.0f;
+    private float timeCurrentWaiting = 0f;
 
 
     private float speed;
     
     
-        // Use this for initialization
     void Start()
     {
         speed = Time.deltaTime/2f;
+        directionMultiplier = 2;
     }
 
     void Update()
     {
-        if (time <= 0f){
-            move();
-            time = 2f;
+        if (arrived){
+            timeCurrentWaiting += Time.deltaTime;
+            if (timeCurrentWaiting >= waitTime){
+                arrived = false;
+                timeCurrentWaiting = 0f;
+            }
+        }else{
+            move();            
         }
-
-        time -= Time.deltaTime;
     }
 
     private void move(){
-        int direction = Random.Range(0, 4);
-        float smoothMovement = 0.5f;
-        directionMultiplier = 2;
+        if (canMove || collided){
+           canMove = false;
+           collided = false;
+           direction = Random.Range(0, 4);
+           target = transform.position;
+           
+           switch(direction){
+            case 0:
+                target += Vector3.down * directionMultiplier;
+            break;
 
-        direction = 0;
+            case 1:
+                target += Vector3.up * directionMultiplier;
+            break;
+            
+            case 2:
+                target += Vector3.right * directionMultiplier;
+            break;
+            
+            case 3:
+                target += Vector3.left * directionMultiplier;
+            break;
+           }
+        }
+
         switch(direction){
             case 0:
             if (canGoDown()){
-                while(smoothMovement >= 0f){
-                    transform.position = Vector3.MoveTowards(transform.position, Vector3.down * directionMultiplier, speed);
-                    smoothMovement -= Time.deltaTime;
-                }
+                transform.position = Vector3.MoveTowards(transform.position, target, speed);
             }
             break;
 
             case 1:
             if (canGoUp()){
-                while(smoothMovement >= 0f){
-                    smoothMovement -= Time.deltaTime;
-                    transform.position = Vector3.MoveTowards(transform.position, Vector3.up * directionMultiplier, speed);
-                }
+                transform.position = Vector3.MoveTowards(transform.position, target, speed);
             }
             break;
 
             case 2:
             if (canGoRight()){
-                while(smoothMovement >= 0f){
-                    smoothMovement -= Time.deltaTime;
-                    transform.position = Vector3.MoveTowards(transform.position, Vector3.right * directionMultiplier, speed);
-                }
+                transform.position = Vector3.MoveTowards(transform.position, target, speed);
             }
             break;
 
             case 3:
             if (canGoLeft()){
-                while(smoothMovement >= 0f){
-                    smoothMovement -= Time.deltaTime;
-                    transform.position = Vector3.MoveTowards(transform.position, Vector3.left * directionMultiplier, speed);
-                }
+                transform.position = Vector3.MoveTowards(transform.position, target, speed);
             }
             break;
+        }
+
+        if (Vector3.Distance(transform.position, target) == 0f){
+            arrived = true;
+            canMove = true;
         }
     }
 
@@ -87,19 +114,40 @@ public class character1 : MonoBehaviour
     }
 
     private bool canGoDown(){
-        return transform.position.y - directionMultiplier > floor.transform.position.y;
+        if (transform.position.y - directionMultiplier > floor.transform.position.y){
+            return true;
+        }else{
+            collided = true;
+            return false;
+        }
+
     }
 
     private bool canGoUp(){
-        return transform.position.y + directionMultiplier < roof.transform.position.y;
+        if(transform.position.y + directionMultiplier < roof.transform.position.y){
+            return true;
+        }else{
+            collided = true;
+            return false;
+        }
     }
 
     private bool canGoRight(){
-        return transform.position.x + directionMultiplier < rightWall.transform.position.x;
+        if(transform.position.x + directionMultiplier < rightWall.transform.position.x){
+            return true;
+        }else{
+            collided = true;
+            return false;
+        }
     }
 
     private bool canGoLeft(){
-        return transform.position.x - directionMultiplier > leftWall.transform.position.x;
+        if(transform.position.x - directionMultiplier > leftWall.transform.position.x){
+                    return true;
+        }else{
+            collided = true;
+            return false;
+        }
     }
 
 }
