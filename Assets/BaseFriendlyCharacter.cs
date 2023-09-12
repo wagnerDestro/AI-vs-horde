@@ -9,6 +9,7 @@ public class BaseFriendlyCharacter : MonoBehaviour
 
     public Vector3 target;
 
+
     public bool arrived = false;
 
     public bool canMove = true;
@@ -20,13 +21,19 @@ public class BaseFriendlyCharacter : MonoBehaviour
     private float timeCurrentWaiting = 0f;
 
 
+    public float rangeToSearch = 5f;
+
     private float speed;
 
     private new Rigidbody2D rigidbody2D;
-    
-    
+
+    public Vector3 targetToShoot { get; set; }
+    public string state { get; set; }
+    public string SHOOTING { get; set; } = "SHOOTING";
+
     void Start()
     {
+        targetToShoot = transform.position;
         speed = Time.deltaTime/2f;
         directionMultiplier = 2;
         waitTime = Random.Range(1, 4);
@@ -35,6 +42,25 @@ public class BaseFriendlyCharacter : MonoBehaviour
 
     void Update()
     {
+        if (targetToShoot == transform.position) {
+            LayerMask enemyMask = LayerMask.GetMask("enemy");
+            Collider2D closestEnemy = Physics2D.OverlapCircle(transform.position, 5f, enemyMask);
+            if (closestEnemy != null) {
+                targetToShoot = closestEnemy.gameObject.transform.position;
+            }else{
+                targetToShoot = transform.position;
+            }
+        }
+
+        if (targetToShoot != transform.position){
+            Vector3 difference = targetToShoot - transform.position;
+            float rotationZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0.0f, 0.0f, rotationZ);
+            state = SHOOTING;
+        }
+
+        Debug.Log(rangeToSearch);
+
         if (arrived){
             timeCurrentWaiting += Time.deltaTime;
             if (timeCurrentWaiting >= waitTime){
@@ -43,7 +69,9 @@ public class BaseFriendlyCharacter : MonoBehaviour
                 waitTime = Random.Range(1, 4); 
             }
         }else{
-            move();            
+            if (state != SHOOTING){
+                move();
+            }
         }
     }
 

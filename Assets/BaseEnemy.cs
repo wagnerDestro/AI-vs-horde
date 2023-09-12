@@ -24,13 +24,7 @@ public class BaseEnemy : MonoBehaviour
         speed = Time.deltaTime;
         rigidbody2D = GetComponent<Rigidbody2D>();
         LayerMask playerMask = LayerMask.GetMask("playerCharacter");
-        Collider2D[] playerObjects = Physics2D.OverlapCircleAll(transform.position, 999, playerMask);
-        target = playerObjects[0];
-        foreach (Collider2D playerObject in playerObjects){
-            if ((rigidbody2D.transform.position - playerObject.transform.position).magnitude < (rigidbody2D.transform.position - target.transform.position).magnitude){
-                target = playerObject;
-            }
-        }
+        target = Physics2D.OverlapCircle(transform.position, 999, playerMask);
     }
 
     // Update is called once per frame
