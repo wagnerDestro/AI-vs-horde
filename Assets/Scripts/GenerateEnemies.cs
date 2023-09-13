@@ -7,7 +7,7 @@ public class GenerateEnemies : MonoBehaviour
 
     public GameObject enemy;
 
-    public int enemyCount = 0;
+    public int enemyCount {get; private set;} = 0;
 
     public int maxEnemies = 10;
 

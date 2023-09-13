@@ -7,7 +7,7 @@ public class BaseFriendlyCharacter : MonoBehaviour
     
     private int directionMultiplier;
 
-    public Vector3 target;
+    public Vector3 targetToMove;
 
 
     public bool arrived = false;
@@ -21,19 +21,27 @@ public class BaseFriendlyCharacter : MonoBehaviour
     private float timeCurrentWaiting = 0f;
 
 
-    public float rangeToSearch = 5f;
+    public float rangeToSearch;
 
     private float speed;
 
     private new Rigidbody2D rigidbody2D;
 
-    public Vector3 targetToShoot { get; set; }
+    public GameObject targetToShoot {get; set; }
+    public Vector3 initialPosition;
     public string state { get; set; }
     public string SHOOTING { get; set; } = "SHOOTING";
+    public string MOVING { get; set; } = "MOVING";
+
+    private FloorScript floorScript;
+
+    public GameObject floor;
 
     void Start()
     {
-        targetToShoot = transform.position;
+        floorScript = floor.GetComponent<FloorScript>();
+        rangeToSearch = 999f;
+        targetToShoot = gameObject;
         speed = Time.deltaTime/2f;
         directionMultiplier = 2;
         waitTime = Random.Range(1, 4);
@@ -42,24 +50,35 @@ public class BaseFriendlyCharacter : MonoBehaviour
 
     void Update()
     {
-        if (targetToShoot == transform.position) {
+        if (floorScript.enemyOnScreen > 0){
             LayerMask enemyMask = LayerMask.GetMask("enemy");
-            Collider2D closestEnemy = Physics2D.OverlapCircle(transform.position, 5f, enemyMask);
+            Collider2D closestEnemy = Physics2D.OverlapCircle(transform.position, rangeToSearch, enemyMask);
             if (closestEnemy != null) {
-                targetToShoot = closestEnemy.gameObject.transform.position;
+                BaseEnemy baseEnemy = closestEnemy.gameObject.GetComponent<BaseEnemy>();
+                if ((targetToShoot == gameObject || targetToShoot == null) && baseEnemy.onScreen) {
+                    targetToShoot = closestEnemy.gameObject;
+                }else{
+                    if (targetToShoot == null){
+                        targetToShoot = gameObject;
+                    }
+                    if (Vector3.Distance(transform.position, closestEnemy.gameObject.transform.position) < Vector3.Distance(transform.position, targetToShoot.transform.position)){
+                        targetToShoot = closestEnemy.gameObject;
+                    }
+                }
             }else{
-                targetToShoot = transform.position;
+                targetToShoot = gameObject;
             }
         }
+        
 
-        if (targetToShoot != transform.position){
-            Vector3 difference = targetToShoot - transform.position;
+        if (targetToShoot != gameObject){
+            Vector3 difference = targetToShoot.transform.position - transform.position;
             float rotationZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0.0f, 0.0f, rotationZ);
             state = SHOOTING;
+        }else{
+            state = MOVING;
         }
-
-        Debug.Log(rangeToSearch);
 
         if (arrived){
             timeCurrentWaiting += Time.deltaTime;
@@ -69,7 +88,7 @@ public class BaseFriendlyCharacter : MonoBehaviour
                 waitTime = Random.Range(1, 4); 
             }
         }else{
-            if (state != SHOOTING){
+            if (state == MOVING){
                 move();
             }
         }
@@ -79,35 +98,35 @@ public class BaseFriendlyCharacter : MonoBehaviour
         if (canMove || collided){
            canMove = false;
            collided = false;
-           target = transform.position;
+           targetToMove = transform.position;
            direction = Random.Range(0, 4);
             
            switch(direction){
                 case 0:
-                    target += Vector3.down * directionMultiplier;
+                    targetToMove += Vector3.down * directionMultiplier;
                 break;
 
                 case 1:
-                    target += Vector3.up * directionMultiplier;
+                    targetToMove += Vector3.up * directionMultiplier;
                 break;
                 
                 case 2:
-                    target += Vector3.right * directionMultiplier;
+                    targetToMove += Vector3.right * directionMultiplier;
                 break;
                 
                 case 3:
-                    target += Vector3.left * directionMultiplier;
+                    targetToMove += Vector3.left * directionMultiplier;
                 break;
             }
         }
 
         if(checkIfCanMove(direction)){
-            transform.position = Vector3.MoveTowards(transform.position, target, speed);
+            transform.position = Vector3.MoveTowards(transform.position, targetToMove, speed);
         }else{
             collided = true;
         }
 
-        if (Vector3.Distance(transform.position, target) == 0f){
+        if (Vector3.Distance(transform.position, targetToMove) == 0f){
             arrived = true;
             canMove = true;
         }

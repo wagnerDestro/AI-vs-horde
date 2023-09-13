@@ -10,11 +10,13 @@ public class BaseEnemy : MonoBehaviour
 
     private float speed;
 
-    private bool canShoot;
+    public bool onScreen { get; set; } = false;
 
-    public global::System.Boolean CanShoot1 { get => canShoot; set => canShoot = value; }
+    public bool canShoot { get; set; }
 
     private int directionMultiplier;
+
+    public int life {get; set;} = 10;
 
 
     // Start is called before the first frame update
@@ -36,5 +38,10 @@ public class BaseEnemy : MonoBehaviour
         }else{
             canShoot = true;
         }
+
+        if (life <= 0){
+            Destroy(gameObject);
+        }
     }
+
 }
