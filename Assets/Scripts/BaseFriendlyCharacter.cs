@@ -36,6 +36,8 @@ public class BaseFriendlyCharacter : MonoBehaviour
     private FloorScript floorScript;
 
     public GameObject floor;
+    
+    public GameObject shooter;
 
     void Start()
     {
@@ -46,6 +48,13 @@ public class BaseFriendlyCharacter : MonoBehaviour
         directionMultiplier = 2;
         waitTime = Random.Range(1, 4);
         rigidbody2D = GetComponent<Rigidbody2D>();
+
+        foreach (Transform child in gameObject.transform)
+          {
+            if (child.tag == "shooter"){
+                shooter = child.gameObject;
+            }
+          } 
     }
 
     void Update()
@@ -72,9 +81,15 @@ public class BaseFriendlyCharacter : MonoBehaviour
         
 
         if (targetToShoot != gameObject){
-            Vector3 difference = targetToShoot.transform.position - transform.position;
-            float rotationZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(0.0f, 0.0f, rotationZ);
+            Vector3 direction =  targetToShoot.transform.position - transform.position;
+
+            // Calcula a rotação para olhar na direção do alvo
+            Quaternion rotation = Quaternion.LookRotation(Vector3.forward, direction);
+
+            // Aplica a rotação ao objeto no eixo Z
+            transform.rotation = rotation;
+            shooter.transform.rotation = rotation;
+            Debug.DrawRay(transform.position, direction, Color.green);
             state = SHOOTING;
         }else{
             state = MOVING;
