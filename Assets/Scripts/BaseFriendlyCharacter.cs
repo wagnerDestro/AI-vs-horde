@@ -39,6 +39,8 @@ public class BaseFriendlyCharacter : MonoBehaviour
     
     public GameObject shooter;
 
+    public Quaternion oldRotation;
+
     void Start()
     {
         floorScript = floor.GetComponent<FloorScript>();
@@ -49,12 +51,13 @@ public class BaseFriendlyCharacter : MonoBehaviour
         waitTime = Random.Range(1, 4);
         rigidbody2D = GetComponent<Rigidbody2D>();
 
-        foreach (Transform child in gameObject.transform)
-          {
+        foreach (Transform child in gameObject.transform){
             if (child.tag == "shooter"){
                 shooter = child.gameObject;
             }
-          } 
+        }
+
+        oldRotation = transform.rotation;
     }
 
     void Update()
@@ -70,7 +73,7 @@ public class BaseFriendlyCharacter : MonoBehaviour
                     if (targetToShoot == null){
                         targetToShoot = gameObject;
                     }
-                    if (Vector3.Distance(transform.position, closestEnemy.gameObject.transform.position) < Vector3.Distance(transform.position, targetToShoot.transform.position)){
+                    if (Vector2.Distance(transform.position, closestEnemy.gameObject.transform.position) < Vector2.Distance(transform.position, targetToShoot.transform.position)){
                         targetToShoot = closestEnemy.gameObject;
                     }
                 }
@@ -106,6 +109,10 @@ public class BaseFriendlyCharacter : MonoBehaviour
             if (state == MOVING){
                 move();
             }
+        }
+
+        if (targetToShoot == null){
+            transform.rotation = oldRotation;
         }
     }
 

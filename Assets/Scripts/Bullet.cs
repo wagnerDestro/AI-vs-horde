@@ -5,11 +5,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
 
-    public float speed;
-    public float directionMultiplier = 10f;
-
     public Vector3 target;
-
 
     private BaseFriendlyCharacter baseFriendlyCharacter;
 
@@ -19,8 +15,7 @@ public class Bullet : MonoBehaviour
     void Start()
     {
         baseFriendlyCharacter = transform.parent.parent.GetComponent<BaseFriendlyCharacter>();
-        target = baseFriendlyCharacter.targetToShoot.transform.position;
-        speed = 0.01f;
+        target =  baseFriendlyCharacter.targetToShoot.transform.position - transform.position;
         transform.parent = null;
     }
 
@@ -28,9 +23,7 @@ public class Bullet : MonoBehaviour
     void Update()
      {
          if (gameObject != null){
-            transform.position = Vector3.MoveTowards(transform.position, target * directionMultiplier, speed);
-            Debug.Log("posicao da bala: " + transform.position);
-            Debug.Log("posicao do alvo: " + target);
+            transform.Translate(target * Time.deltaTime);
         }
     }
 
